@@ -1,0 +1,73 @@
+{
+  "name": "safari-payload-plugin",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./rsc": {
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "cross-env next dev dev",
+    "build": "cross-env npm run copyfiles && npm run build:types && npm run build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --outDir dist --rootDir ./src",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/"
+  },
+  "devDependencies": {
+    "@payloadcms/db-mongodb": "3.67.0",
+    "@payloadcms/live-preview-react": "3.67.0",
+    "@payloadcms/next": "^3.67.0",
+    "@payloadcms/richtext-lexical": "3.67.0",
+    "@payloadcms/ui": "3.67.0",
+    "@swc-node/register": "1.10.9",
+    "@swc/cli": "0.6.0",
+    "@swc/core": "^1.15.3",
+    "@types/node": "^24.6.2",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "concurrently": "^9.2.1",
+    "copyfiles": "2.4.1",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.37.0",
+    "eslint-config-next": "15.5.4",
+    "graphql": "^16.11.0",
+    "next": "^15.5.7",
+    "next-sitemap": "^4.2.3",
+    "payload": "3.67.0",
+    "prettier": "^3.6.2",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "rimraf": "3.0.2",
+    "sharp": "0.34.4",
+    "typescript": "5.9.3",
+    "vite-tsconfig-paths": "5.1.4",
+    "vitest": "3.2.4"
+  },
+  "peerDependencies": {
+    "payload": "3.67.0"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0",
+    "pnpm": "^9 || ^10"
+  }
+}
