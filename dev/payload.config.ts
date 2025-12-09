@@ -1,8 +1,9 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { buildConfig } from 'payload';
-import { plugin } from 'plugin';
+import { safaridigitalPlugin } from 'plugin';
 import { fileURLToPath } from 'url';
+import { fromRoot } from 'globals.js';
 import path from 'path';
 import sharp from 'sharp';
 
@@ -15,32 +16,17 @@ export default buildConfig({
             baseDir: path.resolve(dirname),
         },
     },
-    collections: [
-        {
-            slug: 'posts',
-            fields: [],
-        },
-        {
-            slug: 'media',
-            fields: [],
-            upload: {
-                staticDir: path.resolve(dirname, 'media'),
-            },
-        },
-    ],
     db: mongooseAdapter({
         ensureIndexes: true,
-        url: process.env.DATABASE_URI || '',
+        url: 'mongodb://localhost:27200',
     }),
     editor: lexicalEditor(),
     onInit: async payload => {
         // await seed(payload);
     },
     plugins: [
-        plugin({
-            collections: {
-                posts: true,
-            },
+        safaridigitalPlugin({
+            staticDir: fromRoot('.media'),
         }),
     ],
     secret: process.env.PAYLOAD_SECRET || 'test-secret_key',

@@ -1,113 +1,77 @@
-import type { CollectionSlug, Config } from 'payload'
+import type { CollectionSlug, Config } from 'payload';
+import { fr } from 'payload/i18n/fr';
+import { en } from 'payload/i18n/en';
+import { translations } from './locales/translations.js';
+import { buildSafariCollection } from './collections/index.js';
 
-import { customEndpointHandler } from './endpoints/customEndpointHandler.js'
-
-export type PluginConfig = {
-  /**
-   * List of collections to add a custom field
-   */
-  collections?: Partial<Record<CollectionSlug, true>>
-  disabled?: boolean
+export interface PluginConfig {
+    staticDir: string;
+    collections?: Partial<Record<CollectionSlug, true>>;
+    disabled?: boolean;
 }
 
-export const plugin =
-  (pluginOptions: PluginConfig) =>
-  (config: Config): Config => {
-    if (!config.collections) {
-      config.collections = []
-    }
+export const safaridigitalPlugin =
+    (pluginOptions: PluginConfig) =>
+    (config: Config): Config => {
+        config.i18n = {
+            fallbackLanguage: 'fr',
+            supportedLanguages: { fr, en },
+            translations,
+        };
+        config.collections = [
+            ...(config.collections || []),
+            ...buildSafariCollection({ staticDir: pluginOptions.staticDir }),
+        ];
 
-    config.collections.push({
-      slug: 'plugin-collection',
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-      ],
-    })
-
-    if (pluginOptions.collections) {
-      for (const collectionSlug in pluginOptions.collections) {
-        const collection = config.collections.find(
-          (collection) => collection.slug === collectionSlug,
-        )
-
-        if (collection) {
-          collection.fields.push({
-            name: 'addedByPlugin',
-            type: 'text',
-            admin: {
-              position: 'sidebar',
-            },
-          })
+        if (pluginOptions.disabled) {
+            return config;
         }
-      }
-    }
 
-    /**
-     * If the plugin is disabled, we still want to keep added collections/fields so the database schema is consistent which is important for migrations.
-     * If your plugin heavily modifies the database schema, you may want to remove this property.
-     */
-    if (pluginOptions.disabled) {
-      return config
-    }
+        if (!config.endpoints) {
+            config.endpoints = [];
+        }
 
-    if (!config.endpoints) {
-      config.endpoints = []
-    }
+        if (!config.admin) {
+            config.admin = {};
+        }
 
-    if (!config.admin) {
-      config.admin = {}
-    }
+        if (!config.admin.components) {
+            config.admin.components = {};
+        }
 
-    if (!config.admin.components) {
-      config.admin.components = {}
-    }
+        if (!config.admin.components.beforeDashboard) {
+            config.admin.components.beforeDashboard = [];
+        }
 
-    if (!config.admin.components.beforeDashboard) {
-      config.admin.components.beforeDashboard = []
-    }
+        config.admin.components.beforeDashboard.push(`plugin/client#BeforeDashboardClient`);
+        config.admin.components.beforeDashboard.push(`plugin/rsc#BeforeDashboardServer`);
 
-    config.admin.components.beforeDashboard.push(
-      `plugin/client#BeforeDashboardClient`,
-    )
-    config.admin.components.beforeDashboard.push(
-      `plugin/rsc#BeforeDashboardServer`,
-    )
+        const incomingOnInit = config.onInit;
 
-    config.endpoints.push({
-      handler: customEndpointHandler,
-      method: 'get',
-      path: '/my-plugin-endpoint',
-    })
+        config.onInit = async payload => {
+            // Ensure we are executing any existing onInit functions before running our own.
+            if (incomingOnInit) {
+                await incomingOnInit(payload);
+            }
 
-    const incomingOnInit = config.onInit
+            const { totalDocs } = await payload.count({
+                collection: 'plugin-collection',
+                where: {
+                    id: {
+                        equals: 'seeded-by-plugin',
+                    },
+                },
+            });
 
-    config.onInit = async (payload) => {
-      // Ensure we are executing any existing onInit functions before running our own.
-      if (incomingOnInit) {
-        await incomingOnInit(payload)
-      }
+            if (totalDocs === 0) {
+                await payload.create({
+                    collection: 'plugin-collection',
+                    data: {
+                        id: 'seeded-by-plugin',
+                    },
+                });
+            }
+        };
 
-      const { totalDocs } = await payload.count({
-        collection: 'plugin-collection',
-        where: {
-          id: {
-            equals: 'seeded-by-plugin',
-          },
-        },
-      })
-
-      if (totalDocs === 0) {
-        await payload.create({
-          collection: 'plugin-collection',
-          data: {
-            id: 'seeded-by-plugin',
-          },
-        })
-      }
-    }
-
-    return config
-  }
+        return config;
+    };
