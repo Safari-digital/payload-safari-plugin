@@ -2,7 +2,7 @@ import type { CollectionSlug, Config } from 'payload';
 import { fr } from 'payload/i18n/fr';
 import { en } from 'payload/i18n/en';
 import { translations } from './locales/translations.js';
-import { buildSafariCollection } from './collections/index.js';
+import { buildSafariCollection, buildSafariGlobals } from './collections/index.js';
 
 export interface PluginConfig {
     staticDir: string;
@@ -22,6 +22,7 @@ export const safaridigitalPlugin =
             ...(config.collections || []),
             ...buildSafariCollection({ staticDir: pluginOptions.staticDir }),
         ];
+        config.globals = [...(config.globals || []), ...buildSafariGlobals()];
 
         if (pluginOptions.disabled) {
             return config;

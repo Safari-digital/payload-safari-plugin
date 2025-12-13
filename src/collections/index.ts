@@ -1,8 +1,10 @@
-import type { CollectionConfig } from 'payload';
-import { ContactRequests } from './ContactRequests/ContactRequests.js';
+import type { CollectionConfig, Config, GlobalConfig } from 'payload';
 import { Media } from './Media/Media.js';
 import { Pages } from './Pages/Pages.js';
 import { Users } from './Users/Users.js';
+import { Posts } from './Posts/Posts.js';
+import { Tags } from './Tags/Tags.js';
+import { Reviews } from './Reviews/Reviews.js';
 
 interface BuildSafariCollectionProps {
     staticDir: string;
@@ -10,7 +12,6 @@ interface BuildSafariCollectionProps {
 
 export function buildSafariCollection({ staticDir }: BuildSafariCollectionProps): CollectionConfig[] {
     return [
-        ContactRequests,
         {
             ...Media,
             upload: {
@@ -18,6 +19,13 @@ export function buildSafariCollection({ staticDir }: BuildSafariCollectionProps)
             },
         },
         Pages,
+        Posts,
+        Reviews,
+        Tags,
         Users,
     ];
+}
+
+export function buildSafariGlobals(): GlobalConfig[] {
+    return [];
 }

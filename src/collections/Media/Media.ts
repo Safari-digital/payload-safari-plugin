@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload';
-import { FixedToolbarFeature, InlineToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical';
+import { fields } from './Media.fields.js';
 import { CollectionGroup } from '../CollectionGroup.js';
 import { CollectionPermissions } from '../CollectionPermissions.js';
 import { getT } from '../../locales/getT.js';
@@ -12,19 +12,7 @@ export const Media: CollectionConfig<'media'> = {
     },
     access: CollectionPermissions.ReadOnly,
     admin: { group: CollectionGroup.Content.label },
-    fields: [
-        {
-            name: 'alt',
-            type: 'text',
-        },
-        {
-            name: 'caption',
-            type: 'richText',
-            editor: lexicalEditor({
-                features: ({ rootFeatures }) => [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()],
-            }),
-        },
-    ],
+    fields,
     upload: {
         adminThumbnail: 'thumbnail',
         imageSizes: [
